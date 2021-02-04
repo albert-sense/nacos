@@ -115,14 +115,13 @@ public class ExternalDataSourceServiceImpl implements DataSourceService {
     @Override
     public synchronized void reload() throws IOException {
         try {
-            dataSourceList = new ExternalDataSourceProperties()
-                    .build(EnvUtil.getEnvironment(), (dataSource) -> {
-                        JdbcTemplate jdbcTemplate = new JdbcTemplate();
-                        jdbcTemplate.setQueryTimeout(queryTimeout);
-                        jdbcTemplate.setDataSource(dataSource);
-                        testJtList.add(jdbcTemplate);
-                        isHealthList.add(Boolean.TRUE);
-                    });
+            dataSourceList = new ExternalDataSourceProperties().build(EnvUtil.getEnvironment(), (dataSource) -> {
+                JdbcTemplate jdbcTemplate = new JdbcTemplate();
+                jdbcTemplate.setQueryTimeout(queryTimeout);
+                jdbcTemplate.setDataSource(dataSource);
+                testJtList.add(jdbcTemplate);
+                isHealthList.add(Boolean.TRUE);
+            });
             new SelectMasterTask().run();
             new CheckDbHealthTask().run();
         } catch (RuntimeException e) {
@@ -133,6 +132,10 @@ public class ExternalDataSourceServiceImpl implements DataSourceService {
     
     @Override
     public boolean checkMasterWritable() {
+        
+        if (PropertyUtil.isPgsql()) {
+            return true;
+        }
         
         testMasterWritableJT.setDataSource(jt.getDataSource());
         // Prevent the login interface from being too long because the main library is not available

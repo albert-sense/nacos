@@ -16,6 +16,7 @@
 
 package com.alibaba.nacos.config.server.utils;
 
+import com.alibaba.nacos.config.server.constant.Constants;
 import com.alibaba.nacos.sys.env.EnvUtil;
 import org.slf4j.Logger;
 import org.springframework.context.ApplicationContextInitializer;
@@ -274,7 +275,9 @@ public class PropertyUtil implements ApplicationContextInitializer<ConfigurableA
             setInitialExpansionPercent(getInt("initialExpansionPercent", initialExpansionPercent));
             
             // External data sources are used by default in cluster mode
-            setUseExternalDB("mysql".equalsIgnoreCase(getString("spring.datasource.platform", "")));
+            setUseExternalDB(
+                    Constants.DATA_SOURCE_MYSQL.equalsIgnoreCase(getDatasourcePlatform()) || Constants.DATA_SOURCE_PGSQL
+                            .equalsIgnoreCase(getDatasourcePlatform()));
             
             // must initialize after setUseExternalDB
             // This value is true in stand-alone mode and false in cluster mode
@@ -299,6 +302,18 @@ public class PropertyUtil implements ApplicationContextInitializer<ConfigurableA
         }
     }
     
+    public static boolean isMysql() {
+        return Constants.DATA_SOURCE_MYSQL.equalsIgnoreCase(getDatasourcePlatform());
+    }
+    
+    public static boolean isPgsql() {
+        return Constants.DATA_SOURCE_PGSQL.equalsIgnoreCase(getDatasourcePlatform());
+    }
+    
+    public static String getDatasourcePlatform() {
+        return PropertyUtil.getString("spring.datasource.platform", "");
+    }
+    
     private boolean getBoolean(String key, boolean defaultValue) {
         return Boolean.parseBoolean(getString(key, String.valueOf(defaultValue)));
     }
@@ -307,7 +322,7 @@ public class PropertyUtil implements ApplicationContextInitializer<ConfigurableA
         return Integer.parseInt(getString(key, String.valueOf(defaultValue)));
     }
     
-    private String getString(String key, String defaultValue) {
+    private static String getString(String key, String defaultValue) {
         String value = getProperty(key);
         if (value == null) {
             return defaultValue;
@@ -316,7 +331,7 @@ public class PropertyUtil implements ApplicationContextInitializer<ConfigurableA
         return value;
     }
     
-    public String getProperty(String key) {
+    public static String getProperty(String key) {
         return EnvUtil.getProperty(key);
     }
     

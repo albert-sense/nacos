@@ -21,6 +21,7 @@ import com.alibaba.nacos.config.server.model.Page;
 import com.alibaba.nacos.config.server.service.repository.PaginationHelper;
 import com.alibaba.nacos.config.server.service.repository.extrnal.ExternalStoragePersistServiceImpl;
 import com.alibaba.nacos.config.server.utils.LogUtil;
+import com.alibaba.nacos.config.server.utils.PropertyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
@@ -157,9 +158,15 @@ public class ExternalRolePersistServiceImpl implements RolePersistService {
     
     @Override
     public List<String> findRolesLikeRoleName(String role) {
-        String sql = "SELECT role FROM roles WHERE role like '%' ? '%'";
-        List<String> users = this.jt.queryForList(sql, new String[] {role}, String.class);
-        return users;
+        List<String> roles = null;
+        if (PropertyUtil.isPgsql()) {
+            String sql = "SELECT role FROM roles WHERE role like '%" + role + "%'";
+            roles = this.jt.queryForList(sql, null, String.class);
+        } else {
+            String sql = "SELECT role FROM roles WHERE role like '%' ? '%'";
+            roles = this.jt.queryForList(sql, (Object[]) new String[] {role}, String.class);
+        }
+        return roles;
     }
     
     private static final class RoleInfoRowMapper implements RowMapper<RoleInfo> {

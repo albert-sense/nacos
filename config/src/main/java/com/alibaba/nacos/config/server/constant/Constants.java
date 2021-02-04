@@ -267,4 +267,14 @@ public class Constants {
      * Specifies that reads wait without timeout.
      */
     public static final String EXTEND_NEED_READ_UNTIL_HAVE_DATA = "00--0-read-join-0--00";
+    
+    /**
+     * spring.datasource.platform = mysql
+     */
+    public static final String DATA_SOURCE_MYSQL = "mysql";
+    
+    /**
+     * spring.datasource.platform = postgresql
+     */
+    public static final String DATA_SOURCE_PGSQL = "postgresql";
 }
